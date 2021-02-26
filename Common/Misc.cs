@@ -89,10 +89,10 @@ namespace MosFontTool.Common
             }
         }
 
-        public static bool isBlackLikely(Color color)
+        public static bool isBlackLikely(Color color, int threshold)
         {
             int gray = (int)(color.R * .3 + color.G * .59 + color.B * .11);
-            return gray > 0x80;
+            return gray > threshold;
         }
 
         public static int getGrayScale(Color color)

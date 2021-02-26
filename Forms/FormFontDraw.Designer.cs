@@ -59,6 +59,7 @@
             this.vScrollBar1 = new System.Windows.Forms.VScrollBar();
             this.panel2 = new System.Windows.Forms.Panel();
             this.panel8 = new System.Windows.Forms.Panel();
+            this.richTextBoxCharInput = new System.Windows.Forms.RichTextBox();
             this.panel5 = new System.Windows.Forms.Panel();
             this.panel7 = new System.Windows.Forms.Panel();
             this.tabControl1 = new System.Windows.Forms.TabControl();
@@ -105,6 +106,9 @@
             this.label4 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.label10 = new System.Windows.Forms.Label();
+            this.trackBarThreshold = new System.Windows.Forms.TrackBar();
+            this.numericUpDownThreshold = new System.Windows.Forms.NumericUpDown();
             this.buttonSave = new System.Windows.Forms.Button();
             this.textBoxArrayName = new System.Windows.Forms.TextBox();
             this.label9 = new System.Windows.Forms.Label();
@@ -126,7 +130,6 @@
             this.toolStripButtonFontViewer = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton4 = new System.Windows.Forms.ToolStripButton();
-            this.richTextBoxCharInput = new System.Windows.Forms.RichTextBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxZoom)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxPage)).BeginInit();
             this.groupBox1.SuspendLayout();
@@ -155,6 +158,8 @@
             this.groupBox5.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.tabPage4.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.trackBarThreshold)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownThreshold)).BeginInit();
             this.groupBox7.SuspendLayout();
             this.groupBox6.SuspendLayout();
             this.panel6.SuspendLayout();
@@ -355,6 +360,15 @@
             this.panel8.Padding = new System.Windows.Forms.Padding(5);
             this.panel8.Size = new System.Drawing.Size(819, 103);
             this.panel8.TabIndex = 1;
+            // 
+            // richTextBoxCharInput
+            // 
+            this.richTextBoxCharInput.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.richTextBoxCharInput.Location = new System.Drawing.Point(5, 5);
+            this.richTextBoxCharInput.Name = "richTextBoxCharInput";
+            this.richTextBoxCharInput.Size = new System.Drawing.Size(809, 93);
+            this.richTextBoxCharInput.TabIndex = 1;
+            this.richTextBoxCharInput.Text = "";
             // 
             // panel5
             // 
@@ -591,7 +605,7 @@
             this.trackBarOffsetY.Maximum = 15;
             this.trackBarOffsetY.Minimum = -15;
             this.trackBarOffsetY.Name = "trackBarOffsetY";
-            this.trackBarOffsetY.Size = new System.Drawing.Size(104, 42);
+            this.trackBarOffsetY.Size = new System.Drawing.Size(104, 45);
             this.trackBarOffsetY.TabIndex = 6;
             this.trackBarOffsetY.TickStyle = System.Windows.Forms.TickStyle.None;
             this.trackBarOffsetY.ValueChanged += new System.EventHandler(this.numericUpDownBlockWidth_ValueChanged);
@@ -603,7 +617,7 @@
             this.trackBarOffsetX.Maximum = 15;
             this.trackBarOffsetX.Minimum = -15;
             this.trackBarOffsetX.Name = "trackBarOffsetX";
-            this.trackBarOffsetX.Size = new System.Drawing.Size(104, 42);
+            this.trackBarOffsetX.Size = new System.Drawing.Size(104, 45);
             this.trackBarOffsetX.TabIndex = 6;
             this.trackBarOffsetX.TickStyle = System.Windows.Forms.TickStyle.None;
             this.trackBarOffsetX.ValueChanged += new System.EventHandler(this.numericUpDownBlockWidth_ValueChanged);
@@ -615,7 +629,7 @@
             this.trackBarBlockHeight.Maximum = 15;
             this.trackBarBlockHeight.Minimum = -15;
             this.trackBarBlockHeight.Name = "trackBarBlockHeight";
-            this.trackBarBlockHeight.Size = new System.Drawing.Size(211, 42);
+            this.trackBarBlockHeight.Size = new System.Drawing.Size(211, 45);
             this.trackBarBlockHeight.TabIndex = 6;
             this.trackBarBlockHeight.TickStyle = System.Windows.Forms.TickStyle.None;
             this.trackBarBlockHeight.ValueChanged += new System.EventHandler(this.numericUpDownBlockWidth_ValueChanged);
@@ -627,9 +641,10 @@
             this.trackBarBlockWidth.Maximum = 15;
             this.trackBarBlockWidth.Minimum = -15;
             this.trackBarBlockWidth.Name = "trackBarBlockWidth";
-            this.trackBarBlockWidth.Size = new System.Drawing.Size(211, 42);
+            this.trackBarBlockWidth.Size = new System.Drawing.Size(211, 45);
             this.trackBarBlockWidth.TabIndex = 6;
             this.trackBarBlockWidth.TickStyle = System.Windows.Forms.TickStyle.None;
+            this.trackBarBlockWidth.Scroll += new System.EventHandler(this.trackBarBlockWidth_Scroll);
             this.trackBarBlockWidth.ValueChanged += new System.EventHandler(this.numericUpDownBlockWidth_ValueChanged);
             // 
             // buttonResetBlock
@@ -958,6 +973,9 @@
             // 
             // tabPage4
             // 
+            this.tabPage4.Controls.Add(this.label10);
+            this.tabPage4.Controls.Add(this.trackBarThreshold);
+            this.tabPage4.Controls.Add(this.numericUpDownThreshold);
             this.tabPage4.Controls.Add(this.buttonSave);
             this.tabPage4.Controls.Add(this.textBoxArrayName);
             this.tabPage4.Controls.Add(this.label9);
@@ -970,6 +988,42 @@
             this.tabPage4.TabIndex = 3;
             this.tabPage4.Text = "Export Settings";
             this.tabPage4.UseVisualStyleBackColor = true;
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(168, 112);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(61, 14);
+            this.label10.TabIndex = 8;
+            this.label10.Text = "Threshold";
+            this.label10.Click += new System.EventHandler(this.label10_Click);
+            // 
+            // trackBarThreshold
+            // 
+            this.trackBarThreshold.LargeChange = 3;
+            this.trackBarThreshold.Location = new System.Drawing.Point(305, 108);
+            this.trackBarThreshold.Maximum = 255;
+            this.trackBarThreshold.Name = "trackBarThreshold";
+            this.trackBarThreshold.Size = new System.Drawing.Size(104, 45);
+            this.trackBarThreshold.TabIndex = 7;
+            this.trackBarThreshold.TickStyle = System.Windows.Forms.TickStyle.None;
+            this.trackBarThreshold.Scroll += new System.EventHandler(this.trackBarThreshold_Scroll);
+            // 
+            // numericUpDownThreshold
+            // 
+            this.numericUpDownThreshold.AllowDrop = true;
+            this.numericUpDownThreshold.Location = new System.Drawing.Point(232, 106);
+            this.numericUpDownThreshold.Maximum = new decimal(new int[] {
+            255,
+            0,
+            0,
+            0});
+            this.numericUpDownThreshold.Name = "numericUpDownThreshold";
+            this.numericUpDownThreshold.Size = new System.Drawing.Size(70, 22);
+            this.numericUpDownThreshold.TabIndex = 5;
+            this.numericUpDownThreshold.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.numericUpDownThreshold.ValueChanged += new System.EventHandler(this.numericUpDownThreshold_ValueChanged);
             // 
             // buttonSave
             // 
@@ -1004,7 +1058,7 @@
             this.groupBox7.Controls.Add(this.radioButtonRow1);
             this.groupBox7.Location = new System.Drawing.Point(165, 17);
             this.groupBox7.Name = "groupBox7";
-            this.groupBox7.Size = new System.Drawing.Size(214, 125);
+            this.groupBox7.Size = new System.Drawing.Size(214, 69);
             this.groupBox7.TabIndex = 1;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = "Scan Mode";
@@ -1178,15 +1232,6 @@
             this.toolStripButton4.Text = "About";
             this.toolStripButton4.Click += new System.EventHandler(this.toolStripButtonAbout_Click);
             // 
-            // richTextBoxCharInput
-            // 
-            this.richTextBoxCharInput.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.richTextBoxCharInput.Location = new System.Drawing.Point(5, 5);
-            this.richTextBoxCharInput.Name = "richTextBoxCharInput";
-            this.richTextBoxCharInput.Size = new System.Drawing.Size(809, 93);
-            this.richTextBoxCharInput.TabIndex = 1;
-            this.richTextBoxCharInput.Text = "";
-            // 
             // FormFontDraw
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
@@ -1235,6 +1280,8 @@
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tabPage4.ResumeLayout(false);
             this.tabPage4.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.trackBarThreshold)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownThreshold)).EndInit();
             this.groupBox7.ResumeLayout(false);
             this.groupBox7.PerformLayout();
             this.groupBox6.ResumeLayout(false);
@@ -1334,5 +1381,8 @@
         private System.Windows.Forms.TrackBar trackBarOffsetX;
         private System.Windows.Forms.TrackBar trackBarBlockHeight;
         private System.Windows.Forms.RichTextBox richTextBoxCharInput;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.TrackBar trackBarThreshold;
+        private System.Windows.Forms.NumericUpDown numericUpDownThreshold;
     }
 }

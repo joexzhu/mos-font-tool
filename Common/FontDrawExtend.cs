@@ -38,7 +38,6 @@ namespace MosFontTool.Common
         const int SCROLL_STEP = 3;
         const int ROWS_OF_LARGE_SCROLL = 3;
 
-
         /// <summary>
         /// Get scroll maximum value, used for reset vScrollbar when font parameters changed
         /// </summary>
@@ -133,6 +132,45 @@ namespace MosFontTool.Common
         }
 
         /// <summary>
+        /// Zoom image to 2x size, return new bitmap object
+        /// </summary>
+        /// <param name="src"></param>
+        /// <param name="newSize"></param>
+        /// <returns></returns>
+        public static Bitmap ZoomBmp2x(Bitmap src)
+        {
+            Bitmap bmpZoom = new Bitmap(src.Width*2, src.Height*2);
+
+            using (Graphics g = Graphics.FromImage(bmpZoom))
+            {
+                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+                g.DrawImage(src, 0, 0, bmpZoom.Width, bmpZoom.Height);
+            }
+
+            return bmpZoom;
+        }
+
+        /// <summary>
+        /// mono-fy bitmap image, return new bitmap object
+        /// </summary>
+        /// <param name="src"></param>
+        /// <param name="newSize"></param>
+        /// <returns></returns>
+        public static Bitmap BinarifyBmp(Bitmap src, int thredshold)
+        {
+            Bitmap bmpBin = new Bitmap(src.Width, src.Height);
+            for(int i=0; i<src.Width; i++)
+            {
+                for(int j=0; j<src.Height; j++)
+                {
+                    bmpBin.SetPixel(i, j, Misc.isBlackLikely(src.GetPixel(i,j), thredshold) ? Color.White: Color.Black);
+                }
+            }
+
+            return bmpBin;
+        }
+
+        /// <summary>
         /// return a bitmap which drawed a char
         /// </summary>
         /// <param name="settings"></param>
@@ -160,7 +198,7 @@ namespace MosFontTool.Common
             g.TextRenderingHint = settings.RenderingHint;
             g.Clear(settings.BackColor);
             TextRenderer.DrawText(g, c.ToString(), settings.Font,
-                new Rectangle(settings.OffsetX, settings.OffsetY, settings.BlockWidth, settings.BlockHeight),
+                new Rectangle(settings.OffsetX, settings.OffsetY, settings.BlockWidth+1, settings.BlockHeight+1),
                 settings.Forecolor, settings.BackColor, settings.TextFormatFlags);
         }
         /// <summary>
@@ -240,6 +278,83 @@ namespace MosFontTool.Common
             }
         }
 
+        public static void DrawContentImage_DuplicatedImage(Graphics g, int height, FontSettings settings, int scrollOffset)
+        {
+            int charIndex = getCurrentCharIndex(PADDING_LEFT, PADDING_TOP, scrollOffset, settings);
+            if (charIndex == -1) return;
+
+            scrollOffset *= SCROLL_STEP;
+            int workHeight = height - PADDING_TOP - PADDING_BOTTOM;
+            int rowHeight = settings.BlockHeight*2 + BLOCK_MARGIN;
+            int columnWidth = settings.BlockWidth*2 + BLOCK_MARGIN;
+            int rows = workHeight / rowHeight + 1;
+            int rowOffset = scrollOffset % rowHeight;
+            if (rowOffset > 0) rows++;
+
+            g.Clear(Color.FromArgb(60, 60, 60));//Properties.Settings.Default.ContentBackColor);
+            using (Bitmap bmp = new Bitmap(settings.BlockWidth, settings.BlockHeight))
+            {
+                using (Graphics frame = Graphics.FromImage(bmp))
+                {
+                    int x = PADDING_LEFT, y = PADDING_TOP;
+                    Rectangle rectCopy = new Rectangle(0, rowOffset, bmp.Width*2, bmp.Height*2 - rowOffset);
+                    Rectangle rectIndex = new Rectangle(0, rowOffset > 0 ? y - rowOffset : y, PADDING_LEFT, bmp.Height*2);
+                    int charCount = settings.Chars.Length;
+                    //for (int row = 0; row < rows; row++)
+                    while (y < height - PADDING_BOTTOM)
+                    {
+                        // out of range, break
+                        if (charIndex >= charCount) break;
+
+                        // display row index
+                        TextRenderer.DrawText(g,
+                            ((charIndex / 16).ToString("X4")),
+                            Properties.Settings.Default.RowIndexFont, rectIndex,
+                            Properties.Settings.Default.RowIndexColor, Properties.Settings.Default.ContentBackColor,
+                            TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
+
+                        // peachj
+                        for (int column = 0; column < 16; column++)
+                        {
+                            if (charIndex >= charCount) break;
+
+                            DrawChar(frame, settings, settings.Chars[charIndex]);
+                            g.DrawImage(ZoomBmp2x(bmp), x, y, rectCopy, GraphicsUnit.Pixel);
+
+                            DrawChar(frame, settings, settings.Chars[charIndex]);
+                            g.DrawImage(ZoomBmp2x(BinarifyBmp(bmp, settings.gs_threashold)), x+17*columnWidth, y, rectCopy, GraphicsUnit.Pixel);
+                            x += columnWidth;
+
+                            charIndex++;
+                        }
+                        // peachj
+
+                        // after clip first row, reset copy rectangle
+                        if (PADDING_TOP == y)
+                        {
+                            rectCopy.Y = 0;
+                            rectCopy.Height = bmp.Height*2;
+                        }
+
+                        x = PADDING_LEFT;
+                        y += (PADDING_TOP == y ? (rowHeight - rowOffset) : rowHeight);
+                        rectIndex.Y += rowHeight;
+
+                        // clip last row
+                        if (y + rowHeight > height - PADDING_BOTTOM)
+                        {
+                            rectCopy.Height = height - PADDING_BOTTOM - y;
+                        }
+                    }
+
+                    // clear row index
+                    Brush b = new SolidBrush(Color.Red);//Properties.Settings.Default.ContentBackColor);
+                    g.FillRectangle(b, 0, 0, PADDING_LEFT, PADDING_TOP);
+                    g.FillRectangle(b, 0, height - PADDING_BOTTOM, PADDING_LEFT, PADDING_BOTTOM);
+                }
+            }
+        }
+
         /// <summary>
         /// Get one char's font data by given bitmap
         /// </summary>
@@ -247,7 +362,7 @@ namespace MosFontTool.Common
         /// <param name="colorMode"></param>
         /// <param name="scanMode"></param>
         /// <returns></returns>
-        public static List<byte> getCharFontData(Bitmap bmp, COLOR_MODE colorMode, SCAN_MODE scanMode)
+        public static List<byte> getCharFontData(Bitmap bmp, COLOR_MODE colorMode, SCAN_MODE scanMode, int threshold)
         {
             List<byte> bytes = new List<byte>();
             List<Color> colors = new List<Color>();
@@ -279,9 +394,9 @@ namespace MosFontTool.Common
             }
 
             // scan font bitmap
-            for(int i=outsideInitValue; i!=outsideStopValue; i+=outsideStep)
+            for(int i=outsideInitValue; i<outsideStopValue; i+=outsideStep)
             {
-                for(int j=insideInitValue; j!=insideStopValue; j+=insideStep)
+                for(int j=insideInitValue; j<insideStopValue; j+=insideStep)
                 {
                     if (loopOutsideIsX)
                     {
@@ -291,14 +406,13 @@ namespace MosFontTool.Common
                     {
                         colors.Add(bmp.GetPixel(j, i));
                     }
-                    j++;
+                    //j++;
                 }
                 // convert to byte every row or column
-                bytes.AddRange(color2byte(colors, colorMode));
+                bytes.AddRange(color2byte(colors, colorMode, threshold));
                 colors.Clear();
-                i++;
+                //i++;
             }
-
             return bytes;
         }
 
@@ -311,7 +425,7 @@ namespace MosFontTool.Common
         /// <param name="colors">color datas</param>
         /// <param name="colorMode"></param>
         /// <returns></returns>
-        public static List<byte> color2byte(List<Color> colors, COLOR_MODE colorMode)
+        public static List<byte> color2byte(List<Color> colors, COLOR_MODE colorMode, int threshold)
         {
             List<byte> bytes = new List<byte>();
 
@@ -319,25 +433,31 @@ namespace MosFontTool.Common
             {
                 case COLOR_MODE.MONO:
                     {
-                        byte b = 0, mask = 0x80;
+                        byte b = 0, mask = 0x01;
+                        int padding_num = colors.Count % 8;
+                        if (padding_num != 0)
+                        {
+                            for(int i=0; i<padding_num; i++)
+                                colors.Add(Color.FromArgb(0,0,0));
+                        }
                         foreach (Color color in colors)
                         {
-                            if (Misc.isBlackLikely(color))
+                            if (Misc.isBlackLikely(color, threshold))
                             {
                                 b |= mask;
                             }
-                            mask >>= 1;
+                            mask <<= 1;
                             if (mask == 0)
                             {
                                 bytes.Add(b);
                                 //Debug.Write(string.Format("c={0};={1:X2}\t\t", color.ToArgb().ToString("X8").Substring(2), b));
                                 b = 0;
-                                mask = 0x80;
+                                mask = 0x01;
                             }
                         }
 
                         // if can't fill a byte, pad zero to right
-                        if (mask != 0)
+                        if (mask != 0x01)
                         {
                             bytes.Add(b);
                         }

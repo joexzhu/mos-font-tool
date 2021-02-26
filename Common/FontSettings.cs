@@ -17,6 +17,7 @@ namespace MosFontTool.Common
         TextRenderingHint gs_render;
         TextFormatFlags gs_format;
         int gs_blockWidth, gs_blockHeight;
+        public int gs_threashold;
         int gs_offsetX, gs_offsetY;
         string gs_chars;
 

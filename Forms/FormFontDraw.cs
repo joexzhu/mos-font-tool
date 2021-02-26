@@ -65,7 +65,6 @@ namespace MosFontTool
             trackBarOffsetY.Minimum = (int)numericUpDownOffsetY.Minimum;
             trackBarOffsetY.Maximum = (int)numericUpDownOffsetY.Maximum;
             trackBarOffsetY.Value = (int)numericUpDownOffsetY.Value;
-
         }
 
         /// <summary>
@@ -108,6 +107,7 @@ namespace MosFontTool
 
                 fontSettings.SetBlockSize(numericUpDownBlockWidth.Value, numericUpDownBlockHeight.Value);
                 fontSettings.SetOffset(numericUpDownOffsetX.Value, numericUpDownOffsetY.Value);
+                fontSettings.gs_threashold = Convert.ToInt16(numericUpDownThreshold.Value);
 
                 fontSettings.Chars = richTextBoxCharInput.Text;
                 fontSettings.processChars(checkBoxIgnoreNewLine.Checked, checkBoxInsertNewLine.Checked,
@@ -142,7 +142,9 @@ namespace MosFontTool
             Control[] controls = new Control[] { listBoxSystemFont, listBoxSize, richTextBoxCharInput, textBoxForecolor, textBoxBackgroundColor };
             string[] messages = new string[]{Properties.Resources.Err_font_required,Properties.Resources.Err_size_required,
                 Properties.Resources.Err_char_required,Properties.Resources.Err_forecolor_required,Properties.Resources.Err_backcolor_required};
+
             if (!Misc.isFilled(controls, messages)) return;
+            
             // if invalidation do nothing
             if (!getSettings()) return;
 
@@ -216,7 +218,7 @@ namespace MosFontTool
 
             vScrollBar1.Tag = 1;
 
-            FontDrawExtend.DrawContentImage(graphicsOfContent, pictureBoxPage.ClientSize.Height, fontSettings, e.NewValue);
+            FontDrawExtend.DrawContentImage_DuplicatedImage(graphicsOfContent, pictureBoxPage.ClientSize.Height, fontSettings, e.NewValue);
             pictureBoxPage.Refresh();
 
             vScrollBar1.Tag = null;
@@ -377,7 +379,7 @@ namespace MosFontTool
                             foreach (char c in fontSettings.Chars)
                             {
                                 FontDrawExtend.DrawChar(g, fontSettings, c);
-                                bytes = FontDrawExtend.getCharFontData(bmp, colorMode, scanMode);
+                                bytes = FontDrawExtend.getCharFontData(bmp, colorMode, scanMode, fontSettings.gs_threashold);
                                 foreach (byte b in bytes)
                                 {
                                     sw.Write("0x{0:X2},", b);
@@ -492,5 +494,14 @@ namespace MosFontTool
             isBlockAdjusting = false;
         }
 
+        private void numericUpDownThreshold_ValueChanged(object sender, EventArgs e)
+        {
+            trackBarThreshold.Value = (int)numericUpDownThreshold.Value;
+        }
+
+        private void trackBarThreshold_Scroll(object sender, EventArgs e)
+        {
+            numericUpDownThreshold.Value = (int)trackBarThreshold.Value;
+        }
     }
 }
